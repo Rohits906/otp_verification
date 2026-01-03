@@ -23,7 +23,7 @@ if (!preg_match('/^[6-9]\d{9}$/', $mobile)) {
     ]));
 }
 
-$otp = mt_rand(100000, 999999);
+$otp = random_int(100000, 999999);
 
 $createdAt = date("Y-m-d H:i:s");
 $expiresAt = date("Y-m-d H:i:s", strtotime("+5 minutes"));

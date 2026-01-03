@@ -1,6 +1,6 @@
-CREATE DATABASE otp_api;
+CREATE DATABASE otp_db;
 
-USE otp_api;
+USE otp_db;
 
 CREATE TABLE otp_requests (
     id INT AUTO_INCREMENT PRIMARY KEY,
