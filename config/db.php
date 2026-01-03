@@ -4,7 +4,7 @@ mysqli_report(MYSQLI_REPORT_OFF);
 $DB_HOST = "localhost";
 $DB_USER = "root";
 $DB_PASS = "";      
-$DB_NAME = "otp_api";
+$DB_NAME = "otp_db";
 $DB_PORT = 3306;          // Set this based on your MySQL port
 
 $conn = new mysqli(
