@@ -5,24 +5,46 @@ require_once("../config/db.php");
 
 $data = json_decode(file_get_contents("php://input"), true);
 
+if (!is_array($data)) {
+    http_response_code(400);
+    exit(json_encode([
+        "status" => false,
+        "message" => "Invalid request body"
+    ]));
+}
+
 if (empty($data['mobile']) || empty($data['otp'])) {
     http_response_code(400);
     exit(json_encode([
         "status" => false,
-        "message" => "Mobile number and OTP are required"
+        "message" => "OTP not verified"
     ]));
 }
 
-$mobile = trim($data['mobile']);
-$otp    = trim($data['otp']);
+$mobile = (int) $data['mobile'];
+$otp    = (int) $data['otp'];
 
-$stmt = $conn->prepare(
-    "SELECT id FROM otp_requests
-     WHERE mobile = ? AND otp = ? AND expires_at > NOW()
-     ORDER BY id DESC LIMIT 1"
-);
+$sql = "
+    SELECT id
+    FROM otp_requests
+    WHERE mobile = ?
+      AND otp = ?
+      AND expires_at > NOW()
+    ORDER BY id DESC
+    LIMIT 1
+";
 
-$stmt->bind_param("ss", $mobile, $otp);
+$stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+    http_response_code(500);
+    exit(json_encode([
+        "status" => false,
+        "message" => "Server error"
+    ]));
+}
+
+$stmt->bind_param("ii", $mobile, $otp);
 $stmt->execute();
 
 $result = $stmt->get_result();
@@ -31,12 +53,13 @@ if ($result->num_rows === 0) {
     http_response_code(401);
     exit(json_encode([
         "status" => false,
-        "message" => "Invalid or expired OTP"
+        "message" => "OTP not verified"
     ]));
 }
 
 $row = $result->fetch_assoc();
 
+/* Delete OTP after successful verification */
 $delete = $conn->prepare("DELETE FROM otp_requests WHERE id = ?");
 $delete->bind_param("i", $row['id']);
 $delete->execute();
@@ -44,5 +67,5 @@ $delete->execute();
 http_response_code(200);
 exit(json_encode([
     "status" => true,
-    "message" => "OTP verified successfully"
+    "message" => "OTP verified"
 ]));
