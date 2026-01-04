@@ -23,6 +23,9 @@ if (!preg_match('/^[6-9]\d{9}$/', $mobile)) {
     ]));
 }
 
+// Set timezone
+date_default_timezone_set('Asia/Kolkata');
+
 $otp = random_int(100000, 999999);
 
 $createdAt = date("Y-m-d H:i:s");
@@ -41,3 +44,4 @@ exit(json_encode([
     "status" => true,
     "message" => "OTP sent successfully"
 ]));
+?>

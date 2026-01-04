@@ -3,6 +3,9 @@ header("Content-Type: application/json");
 
 require_once("../config/db.php");
 
+// Set timezone to IST
+date_default_timezone_set('Asia/Kolkata');
+
 $data = json_decode(file_get_contents("php://input"), true);
 
 if (!is_array($data)) {
@@ -21,15 +24,15 @@ if (empty($data['mobile']) || empty($data['otp'])) {
     ]));
 }
 
-$mobile = (int) $data['mobile'];
-$otp    = (int) $data['otp'];
+$mobile = trim($data['mobile']);
+$otp = trim($data['otp']);
 
 $sql = "
     SELECT id
     FROM otp_requests
     WHERE mobile = ?
       AND otp = ?
-      AND expires_at > NOW()
+      AND expires_at > CONVERT_TZ(NOW(), 'SYSTEM', '+05:30')
     ORDER BY id DESC
     LIMIT 1
 ";
@@ -44,7 +47,7 @@ if (!$stmt) {
     ]));
 }
 
-$stmt->bind_param("ii", $mobile, $otp);
+$stmt->bind_param("ss", $mobile, $otp);
 $stmt->execute();
 
 $result = $stmt->get_result();
@@ -69,3 +72,4 @@ exit(json_encode([
     "status" => true,
     "message" => "OTP verified"
 ]));
+?>
